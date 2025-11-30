@@ -5,3 +5,5 @@ global.fetch = jest.fn(() =>
     json: () => Promise.resolve([]),
   })
 );
+
+import "jest-axe/extend-expect";

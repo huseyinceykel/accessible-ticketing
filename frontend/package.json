@@ -6,8 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "echo \"No lint configured for frontend\"",
-    "test": "jest --passWithNoTests"
+    "lint": "eslint . --ext ts,tsx",
+    "test": "jest --passWithNoTests",
+    "test:unit": "jest __tests__/unit",
+    "test:accessibility": "jest __tests__/accessibility",
+    "test:pact": "jest __tests__/pact --runInBand",
+    "test:all": "npm run test && npm run test:pact && npm run test:smoke && npm run test:accessibility"
   },
   "dependencies": {
     "next": "16.0.5",
@@ -20,6 +24,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@types/jest": "^30.0.0",
+    "@types/jest-axe": "^3.5.9",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
