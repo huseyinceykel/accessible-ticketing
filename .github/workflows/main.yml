@@ -10,15 +10,12 @@ jobs:
   backend_setup:
     name: 🏗 Backend Setup
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
       - name: Install Backend Dependencies
         run: |
           cd backend
@@ -28,20 +25,16 @@ jobs:
     name: 🧪 Backend Tests
     runs-on: ubuntu-latest
     needs: backend_setup
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
       - name: Install Backend Dependencies
         run: |
           cd backend
           npm ci
-
       - name: Run Backend Tests
         run: |
           cd backend
@@ -50,22 +43,17 @@ jobs:
   backend_build:
     name: 🏗 Build Backend
     runs-on: ubuntu-latest
-    needs:
-      - backend_tests
-
+    needs: backend_tests
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
       - name: Install Backend Dependencies
         run: |
           cd backend
           npm ci
-
       - name: Build Backend
         run: |
           cd backend
@@ -74,7 +62,6 @@ jobs:
   frontend_setup:
     name: 🏗 Frontend Setup
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node
@@ -90,7 +77,6 @@ jobs:
     name: 🔍 Frontend Lint
     runs-on: ubuntu-latest
     needs: frontend_setup
-
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node
@@ -106,26 +92,24 @@ jobs:
           cd frontend
           npm run lint
 
-frontend_tests:
-  name: 🧪 Frontend Tests
-  runs-on: ubuntu-latest
-  needs: frontend_setup
-
-  steps:
-    - uses: actions/checkout@v4
-    - name: Setup Node
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-    - name: Install Frontend Dependencies
-      run: |
-        cd frontend
-        npm ci
-    - name: Run Frontend Tests
-      run: |
-        cd frontend
-        npm run test:all
-
+  frontend_tests:
+    name: 🧪 Frontend Tests
+    runs-on: ubuntu-latest
+    needs: frontend_setup
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm ci
+      - name: Run Frontend Tests
+        run: |
+          cd frontend
+          npm run test:all
 
   frontend_build:
     name: 🏗 Build Frontend
@@ -133,7 +117,6 @@ frontend_tests:
     needs:
       - frontend_lint
       - frontend_tests
-
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node
