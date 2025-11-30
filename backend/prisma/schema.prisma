@@ -1,0 +1,92 @@
+// Veritabanı sağlayıcısı
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  // "native" demek, çalıştığı sistem (Debian) neyse ona uyum sağla demektir.
+  // Garanti olsun diye yaygın Linux hedeflerini de ekliyoruz.
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+// 1. KULLANICI TABLOSU
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String   // Şifrelenmiş (Hashed)
+  name      String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  tickets   Ticket[] 
+  createdEvents Event[]  
+}
+
+// 2. ETKİNLİK TABLOSU
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  date        DateTime
+  location    String
+  price       Float    
+  imageUrl    String?  
+  isActive    Boolean  @default(true)
+  
+  // YENİ: İlişki Alanları
+  creatorId   Int?     // Etkinliği oluşturan adminin ID'si
+  creator     User?    @relation(fields: [creatorId], references: [id])
+
+  seats       Seat[]   
+  createdAt   DateTime @default(now())
+}
+
+// 3. KOLTUK TABLOSU
+model Seat {
+  id          Int        @id @default(autoincrement())
+  label       String     // Örn: "A1"
+  price       Float
+  status      SeatStatus @default(AVAILABLE)
+  
+  // Koltuk Kilitleme
+  lockedByUserId Int?    
+  lockedUntil    DateTime? 
+
+  eventId     Int
+  event       Event      @relation(fields: [eventId], references: [id])
+  ticket      Ticket?    
+}
+
+// 4. BİLET TABLOSU
+model Ticket {
+  id        String   @id @default(uuid())
+  qrCode    String?  
+  status    TicketStatus @default(ACTIVE)
+  
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  
+  seatId    Int      @unique
+  seat      Seat     @relation(fields: [seatId], references: [id])
+  
+  pricePaid Float
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum SeatStatus {
+  AVAILABLE 
+  LOCKED    
+  SOLD      
+}
+
+enum TicketStatus {
+  ACTIVE    
+  CANCELLED 
+  USED      
+}
