@@ -63,6 +63,10 @@ export class AppController {
   async buyTicket(@Body() body: { seats: string[]; email: string; cardNumber: string; eventId: number }) {
     const event = await this.prisma.event.findUnique({ where: { id: body.eventId } });
     if (!event) throw new BadRequestException('Etkinlik bulunamadı.');
+    // --- EKLENECEK KISIM (HATA ÇÖZÜMÜ) ---
+    if (!event) {
+    throw new BadRequestException('Etkinlik bulunamadı.');
+}
     
     if (new Date(event.date) < new Date()) {
         throw new BadRequestException('Bu etkinliğin tarihi geçmiş, bilet alınamaz.');

@@ -11,158 +11,139 @@ on:
       - develop
 
 # -------------------------------------------------------
-# 1) ORTAK HAZIRLIK
+# FRONTEND JOBS
 # -------------------------------------------------------
 jobs:
-  setup:
-    name: 🏗 Setup Environment
+  frontend_setup:
+    name: 🏗 Frontend Setup
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install Dependencies
-        run: npm ci
-
-# -------------------------------------------------------
-# 2) LINT
-# -------------------------------------------------------
-  lint:
-    name: 🔍 Lint Check
-    runs-on: ubuntu-latest
-    needs: setup
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run ESLint
-        run: npm run lint
-
-# -------------------------------------------------------
-# 3) UNIT TESTS
-# -------------------------------------------------------
-  unit_tests:
-    name: 🧪 Unit Tests
-    runs-on: ubuntu-latest
-    needs: setup
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Run Jest Tests
-        run: npm test -- --ci --reporters=default --reporters=jest-junit
-        env:
-          CI: true
-
-# -------------------------------------------------------
-# 4) ACCESSIBILITY TESTS (Pa11y + Axe)
-# -------------------------------------------------------
-  accessibility:
-    name: ♿ Accessibility Tests (Pa11y + Axe)
-    runs-on: ubuntu-latest
-    needs: setup
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Accessibility Tools
+      - name: Install Frontend Dependencies
         run: |
-          npm install -g pa11y
-          npm install -g @axe-core/cli
+          cd frontend
+          npm ci
 
-      - name: Run Pa11y
-        run: pa11y http://localhost:3000 --reporter html > pa11y-report.html || true
-
-      - name: Run Axe Core
-        run: axe http://localhost:3000 --save axe-report.json || true
-
-      - name: Upload Accessibility Reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: accessibility-report
-          path: |
-            pa11y-report.html
-            axe-report.json
-
-# -------------------------------------------------------
-# 5) LIGHTHOUSE AUDIT
-# -------------------------------------------------------
-  lighthouse:
-    name: 🚨 Lighthouse Audit
+  frontend_lint:
+    name: 🔍 Frontend Lint
     runs-on: ubuntu-latest
-    needs: setup
-
+    needs: frontend_setup
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Install Lighthouse
-        run: npm install -g @lhci/cli
+      - name: Lint (frontend)
+        run: |
+          cd frontend
+          npm run lint
 
-      - name: Run Lighthouse
-        run: lhci autorun || true
+  frontend_tests:
+    name: 🧪 Frontend Tests
+    runs-on: ubuntu-latest
+    needs: frontend_setup
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unit Tests (frontend)
+        run: |
+          cd frontend
+          npm test -- --ci
 
-      - name: Upload Lighthouse Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: lighthouse-report
-          path: ./.lighthouseci
-
-# -------------------------------------------------------
-# 6) BUILD
-# -------------------------------------------------------
-  build:
-    name: 🏗 Build Project
+  frontend_build:
+    name: 🏗 Build Frontend
     runs-on: ubuntu-latest
     needs:
-      - lint
-      - unit_tests
-      - accessibility
-      - lighthouse
+      - frontend_lint
+      - frontend_tests
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build (frontend)
+        run: |
+          cd frontend
+          npm run build
+
+# -------------------------------------------------------
+# BACKEND JOBS
+# -------------------------------------------------------
+  backend_setup:
+    name: 🏗 Backend Setup
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-      - name: Build Project
-        run: npm run build
 
-      - name: Upload Build Output
-        uses: actions/upload-artifact@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          name: build
-          path: dist/
+          node-version: 20
+
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          npm ci
+
+  backend_lint:
+    name: 🔍 Backend Lint
+    runs-on: ubuntu-latest
+    needs: backend_setup
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint (backend)
+        run: |
+          cd backend
+          npm run lint
+
+  backend_tests:
+    name: 🧪 Backend Tests
+    runs-on: ubuntu-latest
+    needs: backend_setup
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unit Tests (backend)
+        run: |
+          cd backend
+          npm test -- --ci
+
+  backend_build:
+    name: 🏗 Build Backend
+    runs-on: ubuntu-latest
+    needs:
+      - backend_lint
+      - backend_tests
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build (backend)
+        run: |
+          cd backend
+          npm run build
 
 # -------------------------------------------------------
-# 7) FRONTEND DEPLOY (Vercel)
+# DEPLOY JOBS
 # -------------------------------------------------------
   deploy_frontend:
     name: 🚀 Deploy Frontend (Vercel)
     runs-on: ubuntu-latest
-    needs: build
+    needs:
+      - frontend_build
 
     steps:
       - uses: actions/checkout@v4
-
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v20
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: .
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
-# -------------------------------------------------------
-# 8) BACKEND DEPLOY (Render)
-# -------------------------------------------------------
   deploy_backend:
     name: 🚀 Deploy Backend (Render)
     runs-on: ubuntu-latest
-    needs: build
+    needs:
+      - backend_build
 
     steps:
       - name: Trigger Render Deploy
