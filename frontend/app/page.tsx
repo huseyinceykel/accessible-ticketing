@@ -1,9 +1,25 @@
 'use client';
 import { useState, useEffect } from 'react';
+type EventItem = {
+  id: string;
+  title: string;
+  date: string;
+  location: string;
+  price: number;
+  imageUrl: string;
+  creator?: {
+    name: string;
+  };
+};
+type UserData = {
+  name: string;
+  role: string;
+};
 
 export default function Home() {
-  const [events, setEvents] = useState<any[]>([]);
-  const [user, setUser] = useState<any>(null);
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [user, setUser] = useState<UserData | null>(null);
+
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
