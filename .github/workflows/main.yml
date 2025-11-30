@@ -69,8 +69,8 @@ jobs:
 # -------------------------------------------------------
 # BACKEND JOBS
 # -------------------------------------------------------
-  backend_setup:
-    name: 🏗 Backend Setup
+  backend_tests:
+    name: 🧪 Backend Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -85,6 +85,12 @@ jobs:
         run: |
           cd backend
           npm ci
+
+      - name: Run Backend Tests
+        run: |
+          cd backend
+          npm test
+
 
   backend_lint:
     name: 🔍 Backend Lint
