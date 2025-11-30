@@ -4,6 +4,8 @@ import { use } from "react";
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+
+
 // ------------------ TYPES ------------------
 
 interface Seat {
@@ -117,8 +119,9 @@ const SuccessModal = ({
 
 // ------------------ PAGE ------------------
 
-export default function Page({ params }: { params: { id: string } }) {
-  const { id } = use(params);; // ✔ PARAMS ARTIK DOĞRU
+export default function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  console.log("Event ID:", id);
 
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
@@ -131,33 +134,37 @@ export default function Page({ params }: { params: { id: string } }) {
   });
   const [showModal, setShowModal] = useState(false);
 
-  // ------------------ DATA FETCH ------------------
-
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) setUser(JSON.parse(storedUser));
 
     fetch(`http://localhost:3001/events/${id}`)
-      .then((res) => res.json())
+      .then(res => res.json())
       .then((data: EventDetail) => setEvent(data))
-      .catch(() => setStatus({ type: 'error', message: 'Etkinlik yüklenemedi.' }));
+      .catch(() =>
+        setStatus({ type: 'error', message: 'Etkinlik yüklenemedi.' })
+      );
   }, [id]);
 
   if (!event) {
-    return <div className="text-center py-20 text-slate-500">Yükleniyor...</div>;
+    return (
+      <div className="text-center py-20 text-slate-500">Yükleniyor...</div>
+    );
   }
 
   const seats = event.seats;
-
-  const maxCol = Math.max(...seats.map((s) => parseInt(s.label.replace(/^\D+/g, '')) || 0));
+  const maxCol = Math.max(
+    ...seats.map(s => parseInt(s.label.replace(/^\D+/g, '')) || 0)
+  );
   const colCount = maxCol > 0 ? maxCol : 4;
 
   const isEventPast = new Date(event.date) < new Date();
 
   const totalPrice = selectedSeats.reduce((total, seatLabel) => {
-    const seat = seats.find((s) => s.label === seatLabel);
+    const seat = seats.find(s => s.label === seatLabel);
     return total + (seat?.price || 0);
   }, 0);
+
 
   // ------------------ ACTIONS ------------------
 

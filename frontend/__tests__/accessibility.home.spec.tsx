@@ -4,6 +4,15 @@ import { axe } from "jest-axe";
 import "jest-axe/extend-expect";
 import HomePage from "../app/page";
 
+
+beforeAll(() => {
+  global.fetch = jest.fn(() =>
+    Promise.resolve({
+      json: () => Promise.resolve([]),
+    })
+  ) as jest.Mock;
+});
+
 describe("Accessibility - HomePage", () => {
   beforeAll(() => {
     global.fetch = jest.fn(async () => ({
