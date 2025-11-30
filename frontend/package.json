@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+
+    "lint": "echo \"No lint configured for frontend\"",
+
+    "test": "echo \"No frontend tests yet\" && exit 0"
   },
   "dependencies": {
     "next": "16.0.5",

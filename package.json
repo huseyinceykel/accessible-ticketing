@@ -1,6 +1,17 @@
 {
+  "name": "frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "echo \"no lint configured\"",
+    "test": "echo \"no tests configured\" && exit 0"
+  },
   "dependencies": {
-    "@nestjs/microservices": "^11.1.9",
-    "amqplib": "^0.10.9"
+    "next": "14.1.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
   }
 }
