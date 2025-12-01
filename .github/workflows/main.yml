@@ -152,16 +152,20 @@ jobs:
       - name: Run WCAG Tests (Pa11y)
         run: |
           cd frontend
+
+          echo "📦 Installing dependencies"
           npm ci
+
+          echo "🏗 Building frontend"
           npm run build
 
-          # Frontend server'ı başlat
+          echo "🚀 Starting server"
           nohup npm start >/dev/null 2>&1 &
 
-          # Sunucunun açılmasını bekle
+          echo "⏳ Waiting for server..."
           npx wait-on http://localhost:3000
 
-          # WCAG testini çalıştır
+          echo "🧪 Running Pa11y WCAG tests"
           npm run wcag
 
       - name: Upload WCAG Report
