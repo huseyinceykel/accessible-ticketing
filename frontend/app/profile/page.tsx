@@ -2,27 +2,34 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-export default function Profile() {
+// localStorage güvenli okuma (SSR sırasında window yok)
+const getInitialUser = () => {
+  if (typeof window === 'undefined') return null;
+  const stored = window.localStorage.getItem('user');
+  return stored ? JSON.parse(stored) : null;
+};
 
+const getInitialLoading = () => {
+  if (typeof window === 'undefined') return true;
+  const stored = window.localStorage.getItem('user');
+  // Kullanıcı yoksa direkt loading=false, varsa biletler için yükleme başlasın
+  return !!stored;
+};
+
+export default function Profile() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [tickets, setTickets] = useState<any[]>([]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<any>(getInitialUser);
 
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(getInitialLoading);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (!storedUser) {
-      setLoading(false);
-      return;
-    }
+    // Kullanıcı yoksa bilet çekmeye çalışma
+    if (!user) return;
 
-    const userData = JSON.parse(storedUser);
-    setUser(userData);
-
-    fetch(`http://localhost:3001/my-tickets/${userData.email}`)
+    fetch(`http://localhost:3001/my-tickets/${user.email}`)
       .then(res => res.json())
       .then(data => {
         setTickets(Array.isArray(data) ? data : []);
@@ -33,12 +40,17 @@ export default function Profile() {
         setTickets([]);
         setLoading(false);
       });
-  }, []);
+  }, [user]);
 
-  if (loading)
-    return <div className="p-10 text-center text-slate-500">Yükleniyor...</div>;
+  if (loading) {
+    return (
+      <div className="p-10 text-center text-slate-500">
+        Yükleniyor...
+      </div>
+    );
+  }
 
-  if (!user)
+  if (!user) {
     return (
       <div className="p-10 text-center">
         <Link href="/login" className="text-indigo-600 font-bold underline">
@@ -46,6 +58,7 @@ export default function Profile() {
         </Link>
       </div>
     );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 p-8 font-sans">
