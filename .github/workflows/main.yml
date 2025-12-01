@@ -149,14 +149,15 @@ jobs:
         with:
           node-version: 20
 
-      - name: Run WCAG Tests (Pa11y)
+      - name: Run Pa11y WCAG Tests (WITH PERMANENT cd)
         run: |
+          echo "📁 Switching to frontend"
           cd frontend
 
-          echo "📦 Installing dependencies"
+          echo "📦 Installing deps"
           npm ci
 
-          echo "🏗 Building frontend"
+          echo "🏗 Building"
           npm run build
 
           echo "🚀 Starting server"
@@ -165,11 +166,14 @@ jobs:
           echo "⏳ Waiting for server..."
           npx wait-on http://localhost:3000
 
-          echo "🧪 Running Pa11y WCAG tests"
-          npm run wcag
+          echo "🧪 Running WCAG"
+          node pa11y-runner.js
+
+          echo "📄 Moving report"
+          mv wcag-report.html ../wcag-report.html
 
       - name: Upload WCAG Report
         uses: actions/upload-artifact@v4
         with:
           name: wcag-report
-          path: frontend/wcag-report.html
+          path: wcag-report.html
