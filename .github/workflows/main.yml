@@ -174,7 +174,7 @@ jobs:
           npx pa11y http://localhost:3000 --reporter html > wcag-report.html
 
       - name: Upload WCAG Report Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wcag-report
           path: frontend/wcag-report.html
