@@ -144,9 +144,6 @@ jobs:
     needs: frontend_build
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
 
       - name: Install Frontend Dependencies
         run: |
@@ -156,17 +153,17 @@ jobs:
       - name: Start Frontend Server
         run: |
           cd frontend
-          nohup npm start &
+          npm start &
           sleep 5
 
-      - name: Run WCAG Test
+      - name: Run WCAG Test (Pa11y)
         run: |
           cd frontend
           node pa11y-runner.js
-        continue-on-error: false
 
       - name: Upload WCAG Report Artifact
         uses: actions/upload-artifact@v4
         with:
           name: wcag-report
           path: frontend/wcag-report.html
+
