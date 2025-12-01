@@ -1,13 +1,31 @@
-const pa11y = require('pa11y');
-const fs = require('fs');
+import pa11y from "pa11y";
+import fs from "fs/promises";
 
-(async () => {
-  const results = await pa11y('http://localhost:3000', {
+const run = async () => {
+  const results = await pa11y("http://localhost:3000", {
     chromeLaunchConfig: {
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: ["--no-sandbox", "--disable-setuid-sandbox"]
     },
-    reporter: 'html'
+    standard: "WCAG2AA",
+    includeNotices: true,
+    includeWarnings: true
   });
 
-  fs.writeFileSync('wcag-report.html', results);
-})();
+  const htmlReport = `
+    <html>
+      <head>
+        <meta charset="UTF-8" />
+        <title>WCAG Accessibility Report</title>
+      </head>
+      <body>
+        <h1>WCAG Accessibility Report</h1>
+        <pre>${JSON.stringify(results, null, 2)}</pre>
+      </body>
+    </html>
+  `;
+
+  await fs.writeFile("wcag-report.html", htmlReport);
+  console.log("WCAG report generated: wcag-report.html");
+};
+
+run();
