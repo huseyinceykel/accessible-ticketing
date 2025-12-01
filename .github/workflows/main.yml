@@ -149,7 +149,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Frontend Dependencies
+      - name: Install Frontend
         run: |
           cd frontend
           npm ci
@@ -159,25 +159,21 @@ jobs:
           cd frontend
           npm run build
 
-      - name: Start Frontend Server
+      - name: Start Server
         run: |
           cd frontend
           nohup npm start >/dev/null 2>&1 &
-          sleep 5
+          sleep 6
 
-      - name: Wait for Frontend Server
+      - name: Wait for Frontend
         run: npx wait-on http://localhost:3000
 
-      - name: Run WCAG Test (Pa11y)
+      - name: Run WCAG (Pa11y)
         run: |
           cd frontend
-          npx pa11y http://localhost:3000 \
-            --reporter html \
-            --chrome-arg="--no-sandbox" \
-            --chrome-arg="--disable-setuid-sandbox" \
-            > wcag-report.html
+          npm run wcag
 
-      - name: Upload WCAG Report Artifact
+      - name: Upload WCAG Report
         uses: actions/upload-artifact@v4
         with:
           name: wcag-report
