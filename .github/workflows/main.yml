@@ -170,8 +170,12 @@ jobs:
 
       - name: Run WCAG Test (Pa11y)
         run: |
-          cd frontend
-          npx pa11y http://localhost:3000 --reporter html > wcag-report.html
+          npx pa11y http://localhost:3000 \
+            --reporter html \
+            --chrome-arg="--no-sandbox" \
+            --chrome-arg="--disable-setuid-sandbox" \
+            > wcag-report.html
+
 
       - name: Upload WCAG Report Artifact
         uses: actions/upload-artifact@v4
