@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Link from "next/link";
 
 interface User {
   name: string;
@@ -162,9 +163,9 @@ export default function AdminPage() {
             <span className="text-sm font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
               {currentUser?.name || 'Yönetici'}
             </span>
-            <a href="/" className="text-slate-600 font-bold hover:underline">
+            <Link href="/" className="text-slate-600 font-bold hover:underline">
               Siteye Dön
-            </a>
+            </Link>
             <button
               onClick={handleLogout}
               className="text-red-600 font-bold hover:underline"
