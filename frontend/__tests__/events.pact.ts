@@ -25,7 +25,6 @@ describe("Pact - Events API", () => {
       },
     });
 
-    // Pact V3 standard pattern
     await provider.executeTest(async (mockServer) => {
       const response = await fetch(`${mockServer.url}/events`);
       const body = await response.json();
