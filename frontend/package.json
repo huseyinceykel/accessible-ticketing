@@ -7,11 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ext ts,tsx",
+
     "test": "jest --passWithNoTests",
     "test:unit": "jest __tests__/unit",
     "test:accessibility": "jest __tests__/accessibility",
     "test:pact": "jest __tests__/pact --runInBand --passWithNoTests",
-    "test:all": "npm run test && npm run test:pact && npm run test:accessibility"
+
+    "test:pa11y": "pa11y http://localhost:3000 --reporter html > wcag-report.html",
+
+    "test:all": "npm run test && npm run test:pact && npm run test:accessibility && npm run test:pa11y"
   },
   "dependencies": {
     "next": "16.0.5",

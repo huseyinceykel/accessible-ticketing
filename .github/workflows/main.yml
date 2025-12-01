@@ -111,12 +111,43 @@ jobs:
           cd frontend
           npm run test:all
 
+  # WCAG / Pa11y Accessibility Test Job
+  accessibility_tests:
+    name: ♿ WCAG Accessibility Tests
+    runs-on: ubuntu-latest
+    needs: frontend_setup
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run WCAG Test (Pa11y)
+        run: |
+          cd frontend
+          npx pa11y http://localhost:3000 --reporter html > wcag-report.html
+        env:
+          PORT: 3000
+
+      - name: 📄 Upload WCAG Report Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wcag-report
+          path: frontend/wcag-report.html
+
   frontend_build:
     name: 🏗 Build Frontend
     runs-on: ubuntu-latest
     needs:
       - frontend_lint
       - frontend_tests
+      - accessibility_tests
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node
