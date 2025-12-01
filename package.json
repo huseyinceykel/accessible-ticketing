@@ -11,10 +11,10 @@
     "test": "jest --passWithNoTests",
 
     "test:unit": "jest __tests__/unit",
-    "test:accessibility": "jest __tests__/accessibility",
+
     "test:pact": "jest __tests__/pact --runInBand --passWithNoTests",
 
-    "test:all": "npm run test && npm run test:pact && npm run test:accessibility",
+
 
     "wcag": "node pa11y-runner.js"
   },

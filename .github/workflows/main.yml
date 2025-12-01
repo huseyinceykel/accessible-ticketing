@@ -99,20 +99,28 @@ jobs:
   # FRONTEND TESTS
   # -----------------------------
   frontend_tests:
-    name: 🧪 Frontend Tests
+    name: 🧪 Frontend Jest + Pact Tests
     runs-on: ubuntu-latest
     needs: frontend_setup
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: |
+      - name: Install Frontend Dependencies
+        run: |
           cd frontend
           npm ci
-      - run: |
+      - name: Run Jest Tests
+        run: |
           cd frontend
-          npm run test:all
+          npm test
+      - name: Run Pact Tests
+        run: |
+          cd frontend
+          npm run test:pact
+
 
   # -----------------------------
   # BUILD FRONTEND
