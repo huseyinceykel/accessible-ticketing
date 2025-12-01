@@ -115,7 +115,7 @@ jobs:
   accessibility_tests:
     name: ♿ WCAG Accessibility Tests
     runs-on: ubuntu-latest
-    needs: frontend_setup
+    needs: frontend_build
 
     steps:
       - uses: actions/checkout@v4
@@ -130,11 +130,6 @@ jobs:
           cd frontend
           npm ci
 
-      - name: Build Frontend
-        run: |
-          cd frontend
-          npm run build
-
       - name: Start Frontend Server
         run: |
           cd frontend
@@ -144,16 +139,14 @@ jobs:
       - name: Run WCAG Test (Pa11y)
         run: |
           cd frontend
-          npx pa11y http://localhost:3000 \
-            --chromium-arg=--no-sandbox \
-            --chromium-arg=--disable-setuid-sandbox \
-            --reporter html > wcag-report.html
+          npm run wcag
 
-      - name: 📄 Upload WCAG Report Artifact
+      - name: Upload WCAG Report Artifact
         uses: actions/upload-artifact@v4
         with:
           name: wcag-report
           path: frontend/wcag-report.html
+
 
 
   frontend_build:
