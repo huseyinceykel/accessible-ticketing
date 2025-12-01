@@ -57,7 +57,7 @@ export default function Profile() {
             href="/"
             className="text-indigo-600 font-medium hover:underline flex items-center gap-1"
           >
-            <span>←</span> Ana Sayfaya Dön
+            Ana Sayfaya Dön
           </Link>
         </div>
 
