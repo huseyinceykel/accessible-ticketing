@@ -1,15 +1,14 @@
-import pa11y from 'pa11y';
-import fs from 'fs';
+import pa11y from "pa11y";
+import htmlReporter from "pa11y-reporter-html";
+import fs from "fs";
 
-const run = async () => {
-  const results = await pa11y('http://localhost:3000', {
+(async () => {
+  const results = await pa11y("http://localhost:3000", {
     chromeLaunchConfig: {
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     },
-    reporter: 'html'
   });
 
-  fs.writeFileSync('wcag-report.html', results);
-};
-
-run();
+  const html = await htmlReporter.results(results);
+  fs.writeFileSync("wcag-report.html", html);
+})();
