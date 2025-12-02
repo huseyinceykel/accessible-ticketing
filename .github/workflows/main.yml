@@ -177,3 +177,28 @@ jobs:
         with:
           name: wcag-report
           path: wcag-report.html
+
+  docker-build:
+    needs: [Build Backend, Build Frontend]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker Image
+        run: |
+          docker build -t accessible-ticketing:latest .
+
+      - name: Save Docker Image as Artifact
+        run: |
+          docker save accessible-ticketing:latest | gzip > accessible-ticketing.tar.gz
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-container
+          path: accessible-ticketing.tar.gz
