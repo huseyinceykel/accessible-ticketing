@@ -7,6 +7,9 @@ on:
   pull_request:
 
 jobs:
+  # -----------------------------------------------------
+  # BACKEND SETUP
+  # -----------------------------------------------------
   backend_setup:
     name: 🏗 Backend Setup
     runs-on: ubuntu-latest
@@ -59,9 +62,9 @@ jobs:
           cd backend
           npm run build
 
-  # ----------------------------------------
+  # -----------------------------------------------------
   # FRONTEND SETUP
-  # ----------------------------------------
+  # -----------------------------------------------------
   frontend_setup:
     name: 🏗 Frontend Setup
     runs-on: ubuntu-latest
@@ -133,9 +136,9 @@ jobs:
           cd frontend
           npm run build
 
-  # ----------------------------------------
-  # WCAG ACCESSIBILITY TESTS (PA11y)
-  # ----------------------------------------
+  # -----------------------------------------------------
+  # WCAG ACCESSIBILITY TEST (PA11y)
+  # -----------------------------------------------------
   wcag_test:
     name: WCAG Accessibility Tests (Pa11y)
     runs-on: ubuntu-latest
@@ -178,13 +181,19 @@ jobs:
           name: wcag-report
           path: wcag-report.html
 
+  # -----------------------------------------------------
+  # DOCKER IMAGE (ARTIFACT)
+  # -----------------------------------------------------
   docker-build:
-    needs: [Build Backend, Build Frontend]
+    name: 🐳 Docker Image Build + Artifact
     runs-on: ubuntu-latest
+    needs:
+      - backend_build
+      - frontend_build
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -197,8 +206,8 @@ jobs:
         run: |
           docker save accessible-ticketing:latest | gzip > accessible-ticketing.tar.gz
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+      - name: Upload Docker Artifact
+        uses: actions/upload-artifact@v4
         with:
           name: docker-container
           path: accessible-ticketing.tar.gz
