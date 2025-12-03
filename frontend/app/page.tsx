@@ -25,16 +25,24 @@ export default function Home() {
   const [user, setUser] = useState<UserData | null>(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const loadUser = () => {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+    };
 
-    fetch('http://localhost:3001/events')
-      .then((res) => res.json())
-      .then((data) => setEvents(data))
-      .catch((err) => console.error(err));
+    const loadEvents = () => {
+      fetch('http://localhost:3001/events')
+        .then((res) => res.json())
+        .then((data) => setEvents(data))
+        .catch((err) => console.error(err));
+    };
+
+    loadUser();
+    loadEvents();
   }, []);
+
 
   const handleLogout = () => {
     localStorage.removeItem('token');
