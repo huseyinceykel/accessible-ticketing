@@ -175,11 +175,12 @@ jobs:
           echo "📄 Moving report"
           mv wcag-report.html ../wcag-report.html
 
-      - name: Upload WCAG Report
+      - name: Upload WCAG Reports
         uses: actions/upload-artifact@v4
         with:
-          name: wcag-report
-          path: wcag-report.html
+          name: wcag-reports
+          path: frontend/*.html
+
 
   # -----------------------------------------------------
   # DOCKER IMAGE (ARTIFACT)
