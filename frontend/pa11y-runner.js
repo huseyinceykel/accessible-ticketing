@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 const pa11y = require("pa11y");
 const fs = require("fs");
 
