@@ -38,7 +38,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
 
-      {/* Skip Link — WCAG uyumlu */}
+      {/* Skip Link — çalışıyor, RootLayout'taki #main-content'e gider */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 
@@ -48,9 +48,8 @@ export default function Login() {
         Ana içeriğe atla
       </a>
 
-      {/* Main Content */}
-      <main
-        id="main-content"
+      {/* Burada ARTIK main yok → section kullanıyoruz */}
+      <section
         className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100"
         aria-labelledby="login-heading"
       >
@@ -141,7 +140,7 @@ export default function Login() {
             Kayıt Ol
           </Link>
         </p>
-      </main>
+      </section>
     </div>
   );
 }
