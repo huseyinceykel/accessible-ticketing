@@ -165,11 +165,11 @@ export default function Home() {
       </header>
 
       {/* MAIN CONTENT */}
-      <main
-        id="main-content"
+      <section
         className="max-w-6xl mx-auto p-6 lg:p-12 -mt-16"
         aria-label="Etkinlik Listesi"
       >
+
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {events.map((event) => (
             <article
@@ -243,7 +243,7 @@ export default function Home() {
             <p>Henüz aktif bir etkinlik bulunmuyor.</p>
           </div>
         )}
-      </main>
+      </section>
     </div>
   );
 }
