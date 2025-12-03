@@ -1,22 +1,12 @@
-FROM node:20-slim
+FROM node:20.10.0-slim
 
 WORKDIR /app
 
-# DNS sorunlarını önle
-ENV NODE_OPTIONS=--dns-result-order=ipv4first
-
-# PUPPETEER indirimi engelle
-ENV PUPPETEER_SKIP_DOWNLOAD=true
+ENV NEXT_TELEMETRY_DISABLED=1
 
 COPY package*.json ./
 
-# NPM ayarları
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV npm_config_update_notifier=false
-ENV npm_config_fetch_retries=5
-ENV npm_config_fetch_retry_maxtimeout=60000
-
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 COPY . .
 

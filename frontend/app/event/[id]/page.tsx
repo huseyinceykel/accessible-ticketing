@@ -1,18 +1,16 @@
 'use client';
-import { use } from "react";
-
+import { use } from 'react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-
-
-// ------------------ TYPES ------------------
-
+/* ------------------ TYPES ------------------ */
 interface Seat {
   id: number;
   label: string;
   price: number;
-  status: 'AVAILABLE' | 'SOLD' | 'occupied';
+  status: 'AVAILABLE' | 'LOCKED' | 'SOLD' | 'occupied';
+  lockedByUserId?: number | null;
+  lockedUntil?: string | null;
 }
 
 interface EventDetail {
@@ -29,8 +27,7 @@ interface User {
   email: string;
 }
 
-// ------------------ ICON COMPONENT ------------------
-
+/* ------------------ ICON ------------------ */
 const SeatIcon = ({ status, isSelected }: { status: string; isSelected: boolean }) => (
   <svg
     width="100%"
@@ -38,7 +35,7 @@ const SeatIcon = ({ status, isSelected }: { status: string; isSelected: boolean 
     viewBox="0 0 24 24"
     fill="currentColor"
     className={`transition-all duration-300 transform ${
-      status === 'occupied' || status === 'SOLD'
+      status === 'occupied' || status === 'SOLD' || status === 'LOCKED'
         ? 'text-gray-300'
         : isSelected
         ? 'text-indigo-600 scale-110'
@@ -49,8 +46,7 @@ const SeatIcon = ({ status, isSelected }: { status: string; isSelected: boolean 
   </svg>
 );
 
-// ------------------ MODAL ------------------
-
+/* ------------------ SUCCESS MODAL ------------------ */
 const SuccessModal = ({
   isOpen,
   onClose,
@@ -67,48 +63,39 @@ const SuccessModal = ({
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden">
         <div className="bg-emerald-500 p-6 text-center">
           <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg
-              className="w-8 h-8 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="3"
-            >
+            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
           <h2 className="text-2xl font-bold text-white">İşlem Başarılı!</h2>
           <p className="text-emerald-100 text-sm">İyi seyirler dileriz.</p>
         </div>
+
         <div className="p-6 space-y-4">
           <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 bg-slate-50">
             <p className="text-xs text-slate-400 uppercase font-bold mb-1">Ziyaretçi</p>
             <p className="text-lg font-bold text-slate-800">{name}</p>
           </div>
+
           <div className="flex gap-4">
             <div className="flex-1 border-2 border-dashed border-slate-200 rounded-xl p-4 bg-slate-50">
               <p className="text-xs text-slate-400 uppercase font-bold mb-1">Koltuklar</p>
               <p className="text-lg font-bold text-slate-800">{seats.join(', ')}</p>
             </div>
+
             <div className="flex-1 border-2 border-dashed border-slate-200 rounded-xl p-4 bg-slate-50">
               <p className="text-xs text-slate-400 uppercase font-bold mb-1">Tutar</p>
               <p className="text-lg font-bold text-emerald-600">{totalPrice} ₺</p>
             </div>
           </div>
         </div>
+
         <div className="p-4 border-t border-slate-100">
-          <button
-            onClick={onClose}
-            className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold"
-          >
+          <button onClick={onClose} className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold">
             Tamam, Kapat
           </button>
         </div>
@@ -117,11 +104,9 @@ const SuccessModal = ({
   );
 };
 
-// ------------------ PAGE ------------------
-
+/* ------------------ PAGE ------------------ */
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  console.log("Event ID:", id);
 
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
@@ -134,56 +119,77 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   });
   const [showModal, setShowModal] = useState(false);
 
+  /* ------------------ LOAD USER + EVENT ------------------ */
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) setUser(JSON.parse(storedUser));
 
     fetch(`http://localhost:3001/events/${id}`)
-      .then(res => res.json())
+      .then((res) => res.json())
       .then((data: EventDetail) => setEvent(data))
-      .catch(() =>
-        setStatus({ type: 'error', message: 'Etkinlik yüklenemedi.' })
-      );
+      .catch(() => setStatus({ type: 'error', message: 'Etkinlik yüklenemedi.' }));
   }, [id]);
 
-  if (!event) {
-    return (
-      <div className="text-center py-20 text-slate-500">Yükleniyor...</div>
-    );
-  }
+  /* 🔄 5 SANİYEDE BİR OTOMATİK YENİLEME */
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch(`http://localhost:3001/events/${id}`)
+        .then((res) => res.json())
+        .then((data: EventDetail) => setEvent(data));
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [id]);
+
+  if (!event) return <div className="text-center py-20 text-slate-500">Yükleniyor...</div>;
 
   const seats = event.seats;
-  const maxCol = Math.max(
-    ...seats.map(s => parseInt(s.label.replace(/^\D+/g, '')) || 0)
-  );
-  const colCount = maxCol > 0 ? maxCol : 4;
+  const maxCol = Math.max(...seats.map((s) => parseInt(s.label.replace(/^\D+/g, '')) || 0));
+  const colCount = maxCol || 4;
 
   const isEventPast = new Date(event.date) < new Date();
 
-  const totalPrice = selectedSeats.reduce((total, seatLabel) => {
-    const seat = seats.find(s => s.label === seatLabel);
+  const totalPrice = selectedSeats.reduce((total, lbl) => {
+    const seat = seats.find((s) => s.label === lbl);
     return total + (seat?.price || 0);
   }, 0);
 
+  /* ------------------ HANDLE SEAT SELECT ------------------ */
+  const handleSeatSelect = async (seat: Seat) => {
+    if (seat.status === 'SOLD' || seat.status === 'occupied' || seat.status === 'LOCKED' || isEventPast) return;
 
-  // ------------------ ACTIONS ------------------
+    if (!user) return setStatus({ type: 'error', message: 'Koltuk seçmek için giriş yapın.' });
 
-  const handleSeatSelect = (seat: Seat) => {
-    if (seat.status === 'SOLD' || seat.status === 'occupied' || isEventPast) return;
+    try {
+      const res = await fetch('http://localhost:3001/lock-seat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventId: Number(id),
+          seatCode: seat.label,
+          email: user.email,
+        }),
+      });
 
-    setSelectedSeats((prev) =>
-      prev.includes(seat.label) ? prev.filter((s) => s !== seat.label) : [...prev, seat.label]
-    );
+      const data = await res.json();
+      if (!res.ok) return setStatus({ type: 'error', message: data.message });
 
-    setStatus({ type: '', message: '' });
+      setSelectedSeats((prev) =>
+        prev.includes(seat.label) ? prev.filter((s) => s !== seat.label) : [...prev, seat.label]
+      );
+
+      setStatus({ type: '', message: '' });
+    } catch {
+      setStatus({ type: 'error', message: 'Koltuk seçimi sırasında hata oluştu.' });
+    }
   };
 
+  /* ------------------ BUY ------------------ */
   const handleBuy = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!user) return setStatus({ type: 'error', message: 'Giriş yapın.' });
-    if (selectedSeats.length === 0)
-      return setStatus({ type: 'error', message: 'Koltuk seçin.' });
+    if (selectedSeats.length === 0) return setStatus({ type: 'error', message: 'Koltuk seçin.' });
     if (!cardNumber) return setStatus({ type: 'error', message: 'Kart numarası gerekli.' });
 
     setLoading(true);
@@ -221,16 +227,12 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     window.location.href = '/profile';
   };
 
-  // ------------------ RENDER ------------------
-
+  /* ------------------ RENDER ------------------ */
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
       <nav className="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">
-            D
-          </div>
-
+          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">D</div>
           <Link href="/" className="text-xl font-bold text-slate-800 hover:opacity-80">
             DevFest<span className="text-indigo-600">Bilet</span>
           </Link>
@@ -253,15 +255,11 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       </nav>
 
       <main className="max-w-7xl mx-auto p-4 lg:p-8">
-        {/* Buraya koltuk grid + ödeme formu ekle (senin UI kullanılıyor) */}
-        {/* ------------------ KOLTUKLAR ------------------ */}
-
         <div className="grid lg:grid-cols-12 gap-8 items-start">
 
           {/* SOL TARAF */}
           <div className="lg:col-span-8 space-y-6">
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-
               <h1 className="text-3xl font-bold mb-4">{event.title}</h1>
 
               <div className="flex flex-wrap gap-4 text-slate-500 text-sm mb-8">
@@ -270,25 +268,21 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                 <span>💰 {event.price} ₺</span>
               </div>
 
-              {/* GRID */}
+              {/* KOLTUK GRID */}
               <div className="overflow-x-auto pb-4">
                 <div className="flex justify-center min-w-max px-4">
-                  <div
-                    className="grid gap-2"
-                    style={{ gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}
-                  >
+                  <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}>
                     {seats.map((seat) => {
                       const isSelected = selectedSeats.includes(seat.label);
                       const isSold =
-                        seat.status === 'SOLD' || seat.status === 'occupied';
+                        seat.status === 'SOLD' || seat.status === 'occupied' || seat.status === 'LOCKED';
 
                       return (
                         <button
                           key={seat.id}
                           onClick={() => handleSeatSelect(seat)}
                           disabled={isSold || isEventPast}
-                          className={`
-                            relative flex flex-col items-center justify-center p-1 rounded-lg border-2
+                          className={`relative flex flex-col items-center justify-center p-1 rounded-lg border-2
                             w-12 h-12 transition-all
                             ${
                               isSelected
@@ -300,10 +294,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                           `}
                         >
                           <div className="w-6 h-6">
-                            <SeatIcon
-                              status={seat.status}
-                              isSelected={isSelected}
-                            />
+                            <SeatIcon status={seat.status} isSelected={isSelected} />
                           </div>
                           <span className="text-[10px] font-bold">{seat.label}</span>
                         </button>
@@ -312,32 +303,44 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
 
-          {/* SAĞ TARAF — ÖDEME FORMU */}
+          {/* SAĞ TARAF */}
           <div className="lg:col-span-4">
             <div className="bg-white p-6 rounded-2xl shadow-xl border border-indigo-50">
               <h2 className="text-lg font-bold mb-4">Bilet Özeti</h2>
 
               <form onSubmit={handleBuy} className="space-y-5">
-
+                {/* ----------- X ile Silme Özellikli Liste ----------- */}
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 max-h-60 overflow-y-auto">
                   {selectedSeats.length > 0 ? (
                     selectedSeats.map((lbl) => {
-                      const s = seats.find((x) => x.label === lbl);
+                      const seat = seats.find((x) => x.label === lbl);
                       return (
-                        <div key={lbl} className="flex justify-between">
-                          <span className="font-bold">{lbl}</span>
-                          <span>{s?.price} ₺</span>
+                        <div
+                          key={lbl}
+                          className="flex justify-between items-center py-1 px-2 rounded-lg hover:bg-slate-100"
+                        >
+                          <div>
+                            <span className="font-bold">{lbl}</span>
+                            <span className="ml-2 text-slate-500 text-sm">{seat?.price} ₺</span>
+                          </div>
+
+                          {/* ❌ SİL BUTONU */}
+                          <button
+                            onClick={() =>
+                              setSelectedSeats((prev) => prev.filter((s) => s !== lbl))
+                            }
+                            className="text-red-500 hover:text-red-700 text-lg font-bold"
+                          >
+                            ×
+                          </button>
                         </div>
                       );
                     })
                   ) : (
-                    <p className="text-slate-400 text-center text-sm">
-                      Henüz koltuk seçilmedi
-                    </p>
+                    <p className="text-slate-400 text-center text-sm">Henüz koltuk seçilmedi</p>
                   )}
                 </div>
 
@@ -400,4 +403,3 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     </div>
   );
 }
-// ------------------ END OF FILE ------------------
