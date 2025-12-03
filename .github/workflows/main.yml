@@ -173,13 +173,13 @@ jobs:
           node pa11y-runner.js
 
           echo "📄 Moving report"
-          mv wcag-report.html ../wcag-report.html
 
       - name: Upload WCAG Reports
         uses: actions/upload-artifact@v4
         with:
           name: wcag-reports
-          path: frontend/*.html
+          path: frontend/wcag-*.html
+
 
 
   # -----------------------------------------------------
