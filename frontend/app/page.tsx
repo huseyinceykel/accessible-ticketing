@@ -27,7 +27,6 @@ export default function Home() {
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       setUser(JSON.parse(storedUser));
     }
 
@@ -46,6 +45,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
+
       {/* SKIP LINK (WCAG) */}
       <a
         href="#main-content"
@@ -71,6 +71,7 @@ export default function Home() {
 
           <Link
             href="/"
+            aria-label="Ana sayfa"
             className="text-xl font-bold tracking-tight text-slate-800 hover:opacity-80 
             focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
           >
@@ -84,6 +85,7 @@ export default function Home() {
               <Link
                 href="/admin"
                 role="menuitem"
+                aria-label="Yönetici Paneli"
                 className="text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors 
                 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded px-2 py-1"
               >
@@ -107,6 +109,7 @@ export default function Home() {
                 <Link
                   href="/profile"
                   role="menuitem"
+                  aria-label="Profil – Biletlerim"
                   className="text-sm font-bold text-white bg-indigo-600 px-4 py-2 rounded-full 
                   hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200 
                   focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -133,6 +136,7 @@ export default function Home() {
                 <Link
                   href="/login"
                   role="menuitem"
+                  aria-label="Giriş Yap"
                   className="text-sm font-bold text-slate-600 hover:text-indigo-600 
                   px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
                 >
@@ -144,6 +148,7 @@ export default function Home() {
                 <Link
                   href="/register"
                   role="menuitem"
+                  aria-label="Kayıt Ol"
                   className="text-sm font-bold text-indigo-600 border-2 border-indigo-600 
                   px-4 py-1.5 rounded-full hover:bg-indigo-50 transition-colors 
                   focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -166,9 +171,11 @@ export default function Home() {
 
       {/* MAIN CONTENT */}
       <section
+        id="main-content"
+        aria-labelledby="events-heading"
         className="max-w-6xl mx-auto p-6 lg:p-12 -mt-16"
-        aria-label="Etkinlik Listesi"
       >
+        <h2 id="events-heading" className="sr-only">Etkinlik Listesi</h2>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {events.map((event) => (
@@ -206,6 +213,7 @@ export default function Home() {
                   <h2 className="text-xl font-bold text-slate-900 mb-2 line-clamp-1">
                     <Link
                       href={`/event/${event.id}`}
+                      aria-label={`${event.title} etkinlik detayına git`}
                       className="focus:outline-none before:absolute before:inset-0"
                     >
                       {event.title}
@@ -226,6 +234,7 @@ export default function Home() {
                 <div className="mt-auto relative z-10">
                   <Link
                     href={`/event/${event.id}`}
+                    aria-label={`${event.title} için bilet satın al`}
                     className="block w-full py-3 text-center bg-indigo-600 text-white 
                     font-bold rounded-xl hover:bg-indigo-700 transition-colors 
                     focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -239,7 +248,7 @@ export default function Home() {
         </div>
 
         {events.length === 0 && (
-          <div className="text-center py-20 text-slate-400" role="status">
+          <div className="text-center py-20 text-slate-400" role="status" aria-live="polite">
             <p>Henüz aktif bir etkinlik bulunmuyor.</p>
           </div>
         )}
