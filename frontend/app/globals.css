@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* Erişilebilirlik için odaklanma (focus) stillerini global olarak belirginleştiriyoruz */
 :focus-visible {
   outline: 3px solid #3b82f6; /* Parlak mavi */
   outline-offset: 2px;

@@ -22,7 +22,7 @@ export default function RootLayout({
           Ana İçeriğe Atla
         </a>
 
-        {/* 🔥 ANA İÇERİK SARICI: WCAG hatasını çözen yer */}
+        {/* Main Content */}
         <main id="main-content" className="min-h-screen">
           {children}
         </main>

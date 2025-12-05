@@ -49,7 +49,6 @@ services:
       - "3001:3000"
     volumes:
       - ./backend:/usr/src/app
-      # 👇 İŞTE BU SATIRI EKLE (Aynen kopyala):
       - /usr/src/app/node_modules
     environment:
       - DATABASE_URL=postgresql://myuser:mypassword@postgres:5432/ticketing_db?schema=public
@@ -64,9 +63,6 @@ services:
     command: npm run start:dev
 
   # 5. Frontend (Next.js)
-# ... (Diğerleri aynı)
-
-  # 5. Frontend (Next.js)
   frontend:
     build:
       context: ./frontend
@@ -77,7 +73,6 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    # DNS AYARI EKLENDİ: İnternete çıkabilmesi için
     dns:
       - 8.8.8.8
       - 8.8.4.4

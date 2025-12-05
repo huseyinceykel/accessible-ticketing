@@ -180,8 +180,6 @@ jobs:
           name: wcag-reports
           path: frontend/wcag-*.html
 
-
-
   # -----------------------------------------------------
   # DOCKER IMAGE (ARTIFACT)
   # -----------------------------------------------------
@@ -238,4 +236,3 @@ jobs:
         with:
           name: frontend-docker-image
           path: frontend-image.tar.gz
-

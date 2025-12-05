@@ -9,7 +9,7 @@ const urls = [
   { name: "event-detail", url: "http://localhost:3000/events/1" },
   { name: "profile", url: "http://localhost:3000/profile" },
   { name: "admin", url: "http://localhost:3000/admin" },
-  { name: "test-broken", url: "http://localhost:3000/a11y-test" } // bilerek hatalı sayfa
+  { name: "test-broken", url: "http://localhost:3000/a11y-test" } // Test doğru çalışıyor mu? Hata sayfası
 ];
 
 (async () => {
